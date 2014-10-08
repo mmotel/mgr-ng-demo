@@ -1,0 +1,9 @@
+/* app css stylesheet */
+
+body {
+  padding-top: 75px;
+}
+
+.table > tbody > tr > td {
+  vertical-align: middle;
+}

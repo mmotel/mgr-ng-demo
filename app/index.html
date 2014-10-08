@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en" ng-app="App">
+<head>
+  <meta charset="utf-8">
+  <title>Share Bookmarks</title>
+  <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css">
+  <link rel="stylesheet" href="css/app.css">
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="bower_components/angular/angular.js"></script>
+  <script src="bower_components/angular-route/angular-route.js"></script>
+  <script src="bower_components/angular-resource/angular-resource.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/controllers/controllers.js"></script>
+  <script src="js/filters/filters.js"></script>
+  <script src="js/services/services.js"></script>
+  <script src="js/services/oplogServices.js"></script>
+  <script src="bower_components/jquery/dist/jquery.js"></script>
+  <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
+</head>
+<body  ng-controller="MainAppCtrl">
+
+<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+  <div class="container">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="#"><span class="glyphicon glyphicon-share"></span> Title</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li><a href="#/index">Home</a></li>
+        <li ng-show="!currentUser"><a href="#/signup">Create Account</a></li>
+        </li>
+      </ul>
+      <form name="siginForm" id="signinForm" class="navbar-form navbar-right" ng-submit="signin(credentials)" novalidate ng-show="!currentUser">
+        <div class="form-group {{( siginForm.siginLogin.$invalid ? 'has-error' : '' )}}">
+          <input name="siginLogin" type="text" class="form-control"
+            placeholder="Login" ng-model="credentials.login" ng-minlength="6">
+        </div>
+        <div class="form-group {{( siginForm.siginPassword.$invalid ? 'has-error' : '' )}}">
+          <input name="siginPassword" type="password" class="form-control"
+            placeholder="Password" ng-model="credentials.password" ng-minlength="8">
+        </div>
+        <button type="submit" class="btn btn-default" id="signin-btn"
+        ng-disabled="( siginForm.$invalid || (credentials.login.length === 0) || (credentials.password.length === 0) )">Sign in</button>
+      </form>
+      <ul class="nav navbar-nav navbar-right" ng-show="!!currentUser" id="loggedin-box">
+        <li><a id="welcome-msg">Welcome, {{currentUser.login}}.</a></li>
+        <li><a href="" ng-click="signout()">Sign out <span class="glyphicon glyphicon-circle-arrow-right"></span></a></li>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+
+</nav>
+
+  <div class="container" ng-view></div>
+
+</body>
+</html>
