@@ -49,6 +49,7 @@ module.exports = function ( io, MongoUrl, MongoOplogUrl ) {
         var res = {
           'id': args.id,
           'coll': args.coll,
+          'name': args.name,
           'query': args.query,
           'data': data
         };

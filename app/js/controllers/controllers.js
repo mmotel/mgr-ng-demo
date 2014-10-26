@@ -11,7 +11,7 @@ appControllers.controller('MainAppCtrl',
     AuthService.verify();
 
     //subscribe to collections via oplog
-    OplogClient.sub( 'category', {} );
+  OplogClient.sub( 'category', {/*"owner": 12345*/}, 'Category' );
 
     $scope.credentials = {
       "login": '',
@@ -34,7 +34,7 @@ appControllers.controller('MainAppCtrl',
 controller('indexCtrl',
   ['$scope',
   function( $scope ) {
-    
+
 }]).
 controller('signupCtrl',
   ['$scope', '$location',
