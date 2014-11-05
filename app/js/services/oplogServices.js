@@ -24,52 +24,40 @@ factory('OplogClient',
 
     });
 
-    var cond = function ( item, query ) {
-      var cond = true;
-      for( var prop in query ) {
-        if( query.hasOwnProperty(prop) ) {
-          if ( query[ prop ].$ne ){
-            if( item[ prop ] === query[ prop ].$ne ) {
-              cond = false;
-            }
-          }
-          else if ( item[ prop ] !== query[ prop ] ) {
-            cond = false;
-          }
-        }
-      }
-      return cond;
-    }
-
+    //check if inserted object is valid for any query registered for collection
+    //if it does call callback
+    //callback parameter: collection name
     var ckeckQueryInsert = function ( args, callback ){
       for(var i=0; i < queries[ args.coll ].length; i++){
         var query = queries[ args.coll ][i];
-        console.log(query);
-        if( cond(args.item, query.query) ){
+        // console.log(query);
+        if( OplogManager.condition(query.query, args.item) ){
           callback( query.name );
         }
       }
     }
-
+    //check if item exists in collection
+    //if it does call callback
+    //callback parameters:
+    //(1) collection name
+    //(2) item index in collection (for optimalization)
     var checkQuery = function ( args, callback ) {
       for(var i=0; i < queries[ args.coll ].length; i++){
         var query = queries[ args.coll ][i];
-        console.log(query);
+        // console.log(query);
         var cond = false;
+        var index;
         console.log($rootScope[ query.name ]);
         for(var j=0; j < $rootScope[ query.name ].length; j++){
           var item = $rootScope[ query.name ][j];
-          console.log(item);
-          console.log(item._id.toString());
-          console.log(args.item._id.toString());
-          console.log((item._id.toString() === args.item._id.toString()));
           if(item._id.toString() === args.item._id.toString()){
             cond = true;
+            index  = j;
             break;
           }
         }
         if(cond){
-          callback( query.name );
+          callback( query.name, index );
         }
       }
     }
@@ -83,15 +71,15 @@ factory('OplogClient',
 
     socket.on('edited', function ( args ) {
       console.log( args );
-      checkQuery( args, function ( coll ) {
-        OplogManager.update( $rootScope[ coll ], args.query, args.item );
+      checkQuery( args, function ( coll, index ) {
+        OplogManager.update( $rootScope[ coll ], args.query, args.item, index );
       });
     });
 
     socket.on('removed', function ( args ) {
       console.log( args );
-      checkQuery( args, function ( coll ) {
-        OplogManager.remove( $rootScope[ coll ], args.item );
+      checkQuery( args, function ( coll, index ) {
+        OplogManager.remove( $rootScope[ coll ], args.item, index );
       });
     });
 
@@ -120,64 +108,80 @@ factory('OplogManager',
     coll.push(item);
   };
 
-  var Update = function ( coll, query, item ) {
-    //query:
-    // $set - DONE
-    // $inc
-    // $addToSet
-    // $removeFromSet (?)
-    // few most used $METHODs
-    for(var i = 0; i < coll.length; i++){
-      if( coll[i]._id === item._id ) {
-        // coll[i] = item;
-
-        for( var prop in query ) {
-          if( query.hasOwnProperty(prop) ) {
-            if( prop === "$set" ) {
-              for( var field in query.$set ) {
-                if( query.$set.hasOwnProperty(field) ) {
-                  coll[i][field] = query.$set[field];
-                }
-              }
+  //query:
+  // $set - DONE
+  // $inc
+  // $addToSet
+  // $removeFromSet (?)
+  // few most used $METHODs
+  var Modificator = function ( query, item ) {
+    for( var prop in query ) {
+      if( query.hasOwnProperty(prop) ) {
+        if( prop === "$set" ) {
+          for( var field in query.$set ) {
+            if( query.$set.hasOwnProperty(field) ) {
+              // coll[i][field] = query.$set[field];
+              item[field] = query.$set[field];
             }
           }
         }
-
-        return true;
       }
     }
-    return false;
   };
 
-  var Remove =  function ( coll, item ) {
-    for(var i = 0; i < coll.length; i++){
-      if( coll[i]._id === item._id ) {
-        coll.splice(i, 1);
-        return true;
+  var Update = function ( coll, query, item, index ) {
+    if(!index){
+      for(var i = 0; i < coll.length; i++){
+        if( coll[i]._id === item._id ) {
+          Modificator(query, coll[i]);
+          return true;
+        }
       }
+      return false;
     }
-    return false;
+    else {
+      Modificator(query, coll[index]);
+      return true;
+    }
   };
-  var Find = function ( coll, query ) {
-    var cond = function ( item ) {
-      var cond = true;
-      for( var prop in query ) {
-        if( query.hasOwnProperty(prop) ) {
-          if ( query[ prop ].$ne ){
-            if( item[ prop ] === query[ prop ].$ne ) {
-              cond = false;
-            }
-          }
-          else if ( item[ prop ] !== query[ prop ] ) {
+
+  var Remove =  function ( coll, item, index ) {
+    if(!index){
+      for(var i = 0; i < coll.length; i++){
+        if( coll[i]._id === item._id ) {
+          coll.splice(i, 1);
+          return true;
+        }
+      }
+      return false;
+    }
+    else {
+      coll.splice(index, 1);
+      return true;
+    }
+  };
+
+  var Condition = function ( query, item ) {
+    var cond = true;
+    for( var prop in query ) {
+      if( query.hasOwnProperty(prop) ) {
+        if ( query[ prop ].$ne ){
+          if( item[ prop ] === query[ prop ].$ne ) {
             cond = false;
           }
         }
+        else if ( item[ prop ] !== query[ prop ] ) {
+          cond = false;
+        }
       }
-      return cond;
     }
+    return cond;
+  };
+
+  var Find = function ( coll, query ) {
     var res = [];
     for(var i = 0; i < coll.length; i++){
-      if( cond( coll[i] ) ) {
+      if( Condition(query, coll[i]) ) {
         res.push(coll[i]);
       }
     }
@@ -188,6 +192,8 @@ factory('OplogManager',
     'insert': Insert,
     'update': Update,
     'remove': Remove,
-    'find': Find
+    'find': Find,
+    // 'modificator': Modificator,
+    'condition': Condition
     };
 }]);
