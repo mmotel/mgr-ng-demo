@@ -112,24 +112,23 @@ factory('OplogManager',
   // $set - DONE
   // $inc
   // $addToSet
-  // $removeFromSet (?)
+  // $pull - removeFromSet
   // few most used $METHODs
   var Modificator = function ( query, item ) {
+    var fields;
     for( var prop in query ) {
       if( query.hasOwnProperty(prop) ) {
         //$SET
         if( prop === "$set" ) {
           for( var field in query.$set ) {
             if( query.$set.hasOwnProperty(field) ) {
-              item[field] = query.$set[field];
-            }
-          }
-        }
-        //$INC
-        else if( prop === "$inc" ) {
-          for( var field in query.$inc ) {
-            if( query.$inc.hasOwnProperty(field) ) {
-              item[field] += query.$inc[field];
+              if(item[field]){
+                item[field] = query.$set[field];
+              }
+              else if( /\w\.\d+/.test(field) ){
+                fields = field.split(".");
+                item[fields[0]][fields[1]] = query.$set[field];
+              }
             }
           }
         }
