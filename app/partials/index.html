@@ -7,12 +7,16 @@
       <thead>
         <tr>
           <th>Name</th>
+          <th>Wartość</th>
         </tr>
       </thead>
 
       <tr ng-repeat="cat in Category">
         <td>
           {{ cat.name }}
+        </td>
+        <td>
+          {{ cat.value }}
         </td>
       </tr>
     </table>

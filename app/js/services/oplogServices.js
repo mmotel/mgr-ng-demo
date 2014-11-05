@@ -117,11 +117,19 @@ factory('OplogManager',
   var Modificator = function ( query, item ) {
     for( var prop in query ) {
       if( query.hasOwnProperty(prop) ) {
+        //$SET
         if( prop === "$set" ) {
           for( var field in query.$set ) {
             if( query.$set.hasOwnProperty(field) ) {
-              // coll[i][field] = query.$set[field];
               item[field] = query.$set[field];
+            }
+          }
+        }
+        //$INC
+        else if( prop === "$inc" ) {
+          for( var field in query.$inc ) {
+            if( query.$inc.hasOwnProperty(field) ) {
+              item[field] += query.$inc[field];
             }
           }
         }
