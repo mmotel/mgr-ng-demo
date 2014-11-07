@@ -122,7 +122,7 @@ factory('OplogManager',
         if( prop === "$set" ) {
           for( var field in query.$set ) {
             if( query.$set.hasOwnProperty(field) ) {
-              if(item[field]){
+              if( item.hasOwnProperty(field) ){
                 item[field] = query.$set[field];
               }
               else if( /\w\.\d+/.test(field) ){
