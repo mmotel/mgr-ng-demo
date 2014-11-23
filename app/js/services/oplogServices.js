@@ -109,10 +109,10 @@ factory('OplogManager',
   };
 
   //query:
-  // $set - DONE
-  // $inc
-  // $addToSet
-  // $pull - removeFromSet
+  // $set - CHECK
+  // $inc - CHECK
+  // $addToSet - CHECK
+  // $pull - CHECK
   // few most used $METHODs
   var Modificator = function ( query, item ) {
     var fields;
@@ -168,15 +168,60 @@ factory('OplogManager',
     }
   };
 
+  //QUERY checking
+  //Comparasion:
+  //equal, $ne - CHECK
+  //  $in, $nin - CHECK
+  //Logical:
+  //  $and, $or, $not
+  //Evaluation
+  //  $regexp, $where
+  //Array:
+  //  $all, $elemMatch
   var Condition = function ( query, item ) {
-    var cond = true;
+    var cond = true, i, underCond;
     for( var prop in query ) {
       if( query.hasOwnProperty(prop) ) {
+        //$ne
         if ( query[ prop ].$ne ){
           if( item[ prop ] === query[ prop ].$ne ) {
             cond = false;
           }
         }
+        //$in
+        else if( query[ prop ][ "$in" ] ) {
+          underCond = false;
+          for(i = 0; i < query[ prop ][ "$in" ].length; i++){
+            if( item[ prop ] === query[ prop ][ "$in" ][i] ) {
+              underCond = true;
+              break;
+            }
+          }
+            if( !underCond ) {
+              cond = false;
+            }
+        }
+        //$nin
+        else if( query[ prop ][ "$nin" ] ) {
+          underCond = true;
+          for(i = 0; i < query[ prop ][ "$nin" ].length; i++){
+            if( item[ prop ] === query[ prop ][ "$nin" ][i] ) {
+              underCond = false;
+              break;
+            }
+          }
+            if( !underCond ) {
+              cond = false;
+            }
+        }
+        //$and
+        //$or
+        //$not
+        //$regexp
+        //$where
+        //$all
+        //$elemMatch
+        //equal
         else if ( item[ prop ] !== query[ prop ] ) {
           cond = false;
         }
