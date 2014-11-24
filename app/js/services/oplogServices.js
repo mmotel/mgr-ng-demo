@@ -172,7 +172,8 @@ factory('OplogManager',
   //Comparasion:
   //  equal, $ne, $in, $nin - CHECK
   //Logical:
-  //  $and, $or, $not
+  //  $and, $or - CHECK
+  //  $not ?
   //Evaluation
   //  $regexp
   //Array:
@@ -214,8 +215,28 @@ factory('OplogManager',
       return cond;
     },
     //$and
+    "$and": function (item, queryField) {
+      var cond = true, i;
+      for(var i = 0; i < queryField.length; i++){
+        if( !Condition( queryField[i], item ) ){
+          cond = false;
+          break;
+        }
+      }
+      return cond;
+    },
     //$or
-    //$not
+    "$or": function (item, queryField) {
+      var cond = false, i;
+      for(var i = 0; i < queryField.length; i++){
+        if( Condition( queryField[i], item ) ){
+          cond = true;
+          break;
+        }
+      }
+      return cond;
+    }
+    //$not ?
     //$regexp
     //$all
     //$elemMatch
@@ -238,6 +259,14 @@ factory('OplogManager',
         //$nin
         else if( query[ prop ].$nin ) {
           cond = $Operators.$nin(item[ prop ], query[ prop ].$nin );
+        }
+        //$and
+        else if( prop === "$and" ) {
+          cond = $Operators.$and(item, query[ prop ]);
+        }
+        //$or
+        else if( prop === "$or" ) {
+          cond = $Operators.$or(item, query[ prop ]);
         }
         //equal
         else {
