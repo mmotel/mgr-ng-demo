@@ -11,7 +11,7 @@ appControllers.controller('MainAppCtrl',
     AuthService.verify();
 
     //subscribe to collections via oplog
-  OplogClient.sub( 'category', { $or: [ {"owner": 12345}, {"owner": 12346} ] }, 'Category' );
+  OplogClient.sub( 'category', {}, 'Category' );
 
     $scope.credentials = {
       "login": '',

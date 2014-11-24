@@ -174,10 +174,8 @@ factory('OplogManager',
   //Logical:
   //  $and, $or - CHECK
   //  $not ?
-  //Evaluation
-  //  $regexp
   //Array:
-  //  $all, $elemMatch
+  //  $all, $elemMatch - CHECK
   var $Operators = {
     //: - equal
     "$equal": function (itemField, queryField) {
@@ -217,7 +215,7 @@ factory('OplogManager',
     //$and
     "$and": function (item, queryField) {
       var cond = true, i;
-      for(var i = 0; i < queryField.length; i++){
+      for(i = 0; i < queryField.length; i++){
         if( !Condition( queryField[i], item ) ){
           cond = false;
           break;
@@ -228,18 +226,38 @@ factory('OplogManager',
     //$or
     "$or": function (item, queryField) {
       var cond = false, i;
-      for(var i = 0; i < queryField.length; i++){
+      for(i = 0; i < queryField.length; i++){
         if( Condition( queryField[i], item ) ){
           cond = true;
           break;
         }
       }
       return cond;
-    }
+    },
     //$not ?
-    //$regexp
     //$all
+    "$all": function (itemField, queryField) {
+      var cond = true, i,j;
+      for(i = 0; i < queryField.length; i++){
+        j = itemField.indexOf(queryField[i]);
+        if(j === -1){
+          cond = false;
+          break;
+        }
+      }
+      return cond;
+    },
     //$elemMatch
+    "$elemMatch": function (itemField, queryField) {
+      var cond = false, i;
+      for(i = 0; i < itemField.length; i++){
+        if( Condition( {'prop': queryField }, {'prop': itemField[i] } ) ){
+          cond = true;
+          break;
+        }
+      }
+      return cond;
+    }
   };
 
   //QUERY checking
@@ -267,6 +285,14 @@ factory('OplogManager',
         //$or
         else if( prop === "$or" ) {
           cond = $Operators.$or(item, query[ prop ]);
+        }
+        //$all
+        else if( query[ prop ].$all ) {
+          cond = $Operators.$all(item[ prop ], query[ prop ].$all );
+        }
+        //$elemMatch
+        else if( query[ prop ].$elemMatch ) {
+          cond = $Operators.$elemMatch(item[ prop ], query[ prop ].$elemMatch );
         }
         //equal
         else {
