@@ -168,62 +168,80 @@ factory('OplogManager',
     }
   };
 
-  //QUERY checking
+  //MongoDB $Operators
   //Comparasion:
-  //equal, $ne - CHECK
-  //  $in, $nin - CHECK
+  //  equal, $ne, $in, $nin - CHECK
   //Logical:
   //  $and, $or, $not
   //Evaluation
-  //  $regexp, $where
+  //  $regexp
   //Array:
   //  $all, $elemMatch
+  var $Operators = {
+    //: - equal
+    "$equal": function (itemField, queryField) {
+      var cond = true;
+      if(itemField !== queryField){
+        cond = false;
+      }
+      return cond;
+    },
+    //$ne - not equal
+    "$ne": function (itemField, queryField) {
+      var cond = true;
+      if( $Operators.equal(itemField, queryField) ){
+        cond = false;
+      }
+      return cond;
+    },
+    //$in
+    "$in": function (itemField, queryField) {
+      var cond = false, i;
+      for(i = 0; i < queryField.length; i++){
+        if(itemField === queryField[i]){
+          cond = true;
+          break;
+        }
+      }
+      return cond;
+    },
+    //$nin - not in
+    "$nin": function (itemField, queryField) {
+      var cond = true;
+      if( $Operators.in(itemField, queryField) ){
+        cond = false;
+      }
+      return cond;
+    },
+    //$and
+    //$or
+    //$not
+    //$regexp
+    //$all
+    //$elemMatch
+  };
+
+  //QUERY checking
+  //Checks query for $Operators
   var Condition = function ( query, item ) {
     var cond = true, i, underCond;
     for( var prop in query ) {
       if( query.hasOwnProperty(prop) ) {
         //$ne
         if ( query[ prop ].$ne ){
-          if( item[ prop ] === query[ prop ].$ne ) {
-            cond = false;
-          }
+          cond = $Operators.$ne(item[ prop ], query[ prop ].$ne );
         }
         //$in
-        else if( query[ prop ][ "$in" ] ) {
-          underCond = false;
-          for(i = 0; i < query[ prop ][ "$in" ].length; i++){
-            if( item[ prop ] === query[ prop ][ "$in" ][i] ) {
-              underCond = true;
-              break;
-            }
-          }
-            if( !underCond ) {
-              cond = false;
-            }
+        else if( query[ prop ].$in ) {
+          cond = $Operators.$in(item[ prop ], query[ prop ].$in );
         }
         //$nin
-        else if( query[ prop ][ "$nin" ] ) {
-          underCond = true;
-          for(i = 0; i < query[ prop ][ "$nin" ].length; i++){
-            if( item[ prop ] === query[ prop ][ "$nin" ][i] ) {
-              underCond = false;
-              break;
-            }
-          }
-            if( !underCond ) {
-              cond = false;
-            }
+        else if( query[ prop ].$nin ) {
+          cond = $Operators.$nin(item[ prop ], query[ prop ].$nin );
         }
-        //$and
-        //$or
-        //$not
-        //$regexp
-        //$where
-        //$all
-        //$elemMatch
         //equal
-        else if ( item[ prop ] !== query[ prop ] ) {
-          cond = false;
+        else {
+          cond = $Operators.$equal(item[ prop ], query[ prop ] );
         }
       }
     }
