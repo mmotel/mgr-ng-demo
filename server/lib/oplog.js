@@ -16,7 +16,8 @@ module.exports = function (io, MongoUrl, MongoOplogUrl) {
       'coll': item.coll,
       'item': item.doc
     };
-    io.sockets.emit('inserted', res);
+    SubsManager.handleInsert(res.coll, res.item);
+    // io.sockets.emit('inserted', res);
   });
 
   Oplog.onUpdate(function (item) {
@@ -28,7 +29,8 @@ module.exports = function (io, MongoUrl, MongoOplogUrl) {
         '_id': item._id
       }
     };
-    io.sockets.emit('edited', res);
+    SubsManager.handleUpdate(res.coll, res.item, res.query);
+    // io.sockets.emit('edited', res);
   });
 
   Oplog.onRemove(function (item) {
@@ -39,7 +41,8 @@ module.exports = function (io, MongoUrl, MongoOplogUrl) {
         '_id': item._id
       }
     };
-    io.sockets.emit('removed', res);
+    SubsManager.handleRemove(res.coll, res.item);
+    // io.sockets.emit('removed', res);
   });
   //--- /oplogger
 
@@ -49,7 +52,7 @@ module.exports = function (io, MongoUrl, MongoOplogUrl) {
       DB.find(args.coll, args.query, function (err, data) {
         if(err) { return console.log(err); }
 
-        SubsManager.addSub(args.coll, args.query, client, data);
+        SubsManager.addSub(args.coll, args.name, args.query, client, data);
 
         var res = {
           'id': args.id,
