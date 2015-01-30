@@ -69,8 +69,6 @@ module.exports = (function () {
   var handleUpdate = function (coll, item, query) {
     var qcoll = Queries[coll];
     _.forEach(qcoll, function (entry) {
-      // console.log("["+entry.items.indexOf(item._id.toString())+"]");
-      // if( entry.items.indexOf(item._id.toString()) !== (-1) ){
       if( _.find(entry.items, function (e) { return _.isEqual(e, item._id.toString()); }) ){
         _.forEach(entry.clients, function (c) {
           c.client.emit('updated', {
