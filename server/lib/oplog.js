@@ -1,15 +1,17 @@
-module.exports = function ( io, MongoUrl, MongoOplogUrl ) {
+module.exports = function (io, MongoUrl, MongoOplogUrl) {
 
+  var _ = require('lodash');
   //start oplogger
   var Oplogger = require('./oplogger/main.js');
   var DB = require('./data.js')(MongoUrl);
+  var SubsManager = require('./oplogger/subsManager.js')();
 
-  var Oplog = Oplogger.tail( MongoUrl, MongoOplogUrl,
-              { 'db': 'testdb', 'colls': [ 'category' ] } );
+  var Oplog = Oplogger.tail(MongoUrl, MongoOplogUrl,
+              {'db': 'testdb', 'colls': [ 'category' ]});
 
   //oplogger callbacks
-  Oplog.onInsert( function ( item ) {
-    console.log( item );
+  Oplog.onInsert(function (item) {
+    console.log(item);
     var res = {
       'coll': item.coll,
       'item': item.doc
@@ -17,8 +19,8 @@ module.exports = function ( io, MongoUrl, MongoOplogUrl ) {
     io.sockets.emit('inserted', res);
   });
 
-  Oplog.onUpdate( function ( item ) {
-    console.log( item );
+  Oplog.onUpdate(function (item) {
+    console.log(item);
     var res = {
       'coll': item.coll,
       'query': item.modifier,
@@ -29,8 +31,8 @@ module.exports = function ( io, MongoUrl, MongoOplogUrl ) {
     io.sockets.emit('edited', res);
   });
 
-  Oplog.onRemove( function ( item ) {
-    console.log( item );
+  Oplog.onRemove(function (item) {
+    console.log(item);
     var res = {
       'coll': item.coll,
       'item': {
@@ -41,11 +43,14 @@ module.exports = function ( io, MongoUrl, MongoOplogUrl ) {
   });
   //--- /oplogger
 
-  io.sockets.on('connection', function ( client ) {
+  io.sockets.on('connection', function (client) {
     //oplog tailing: subscription
-    client.on('sub', function ( args ) {
+    client.on('sub', function (args) {
       DB.find(args.coll, args.query, function (err, data) {
-        if( err ) { return console.log( err ); }
+        if(err) { return console.log(err); }
+
+        SubsManager.addSub(args.coll, args.query, client, data);
+
         var res = {
           'id': args.id,
           'coll': args.coll,
@@ -57,6 +62,9 @@ module.exports = function ( io, MongoUrl, MongoOplogUrl ) {
       });
     });
     //--- /subscription
+    client.on('disconnect', function () {
+      SubsManager.rmAllSubs( client );
+    });
   });
 
 };
