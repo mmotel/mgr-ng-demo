@@ -44,7 +44,7 @@ module.exports = function (io, MongoUrl, MongoOplogUrl) {
   //--- /oplogger
 
   io.sockets.on('connection', function (client) {
-    //oplog tailing: subscription
+    //oplog tailing: add subscription
     client.on('sub', function (args) {
       DB.find(args.coll, args.query, function (err, data) {
         if(err) { return console.log(err); }
@@ -61,7 +61,15 @@ module.exports = function (io, MongoUrl, MongoOplogUrl) {
         client.emit('sub', res);
       });
     });
-    //--- /subscription
+    //oplog tailing: remove subscription
+    client.on('rmSub', function (args) {
+      SubsManager.rmSub(args.coll, args.query, client);
+    });
+    //oplog tailing: alter subscription
+    client.on('alterSub', function (args) {
+      //TODO
+    });
+    //oplog tailing: remove all subscriptions on disconnect
     client.on('disconnect', function () {
       SubsManager.rmAllSubs( client );
     });

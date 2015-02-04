@@ -32,8 +32,11 @@ appControllers.controller('MainAppCtrl',
 
 }]).
 controller('indexCtrl',
-  ['$scope',
-  function( $scope ) {
+  ['$scope', 'OplogClient',
+  function( $scope, OplogClient ) {
+    $scope.rmSub = function () {
+      OplogClient.rmSub('category', 'Category');
+    };
 
 }]).
 controller('signupCtrl',
