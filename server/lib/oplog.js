@@ -67,7 +67,22 @@ module.exports = function (io, MongoUrl, MongoOplogUrl) {
     });
     //oplog tailing: alter subscription
     client.on('alterSub', function (args) {
-      //TODO
+      SubsManager.rmSub(args.coll, args.oldQuery, client);
+
+      DB.find(args.coll, args.newQuery, function (err, data) {
+        if(err) { return console.log(err); }
+
+        SubsManager.addSub(args.coll, args.name, args.newQuery, client, data);
+
+        var res = {
+          'id': args.id,
+          'coll': args.coll,
+          'name': args.name,
+          'query': args.newQuery,
+          'data': data
+        };
+        client.emit('sub', res);
+      });
     });
     //oplog tailing: remove all subscriptions on disconnect
     client.on('disconnect', function () {

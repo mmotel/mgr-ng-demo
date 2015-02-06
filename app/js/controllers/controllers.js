@@ -34,6 +34,16 @@ appControllers.controller('MainAppCtrl',
 controller('indexCtrl',
   ['$scope', 'OplogClient',
   function( $scope, OplogClient ) {
+    $scope.query;
+
+    $scope.alterSub = function (query) {
+      OplogClient.alterSub('category', 'Category', {"name": query});
+    };
+
+    // $scope.$watch('query', function () {
+    //   OplogClient.alterSub('category', 'Category', {"name": $scope.query});
+    // });
+
     $scope.rmSub = function () {
       OplogClient.rmSub('category', 'Category');
     };

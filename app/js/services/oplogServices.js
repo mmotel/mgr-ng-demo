@@ -57,6 +57,7 @@ factory('OplogClient',
       'rmSub': function (coll, name) {
         var query = undefined;
         var Name = name || coll;
+        if(! queries[coll]){ return; }
         for(var i = 0; i < queries[coll].length; i++){
           if(queries[coll][i].name === name){
             query = queries[coll][i].query;
@@ -64,13 +65,35 @@ factory('OplogClient',
             break;
           }
         }
-        
+
         delete $rootScope[ Name ];
 
         socket.emit('rmSub', {
           'coll': coll,
           'name': Name,
           'query': query
+        });
+      },
+      'alterSub': function (coll, name, query) {
+        var oldQuery = undefined;
+        var Name = name || coll;
+        if(! queries[coll]){ return; }
+        for(var i = 0; i < queries[coll].length; i++){
+          console.log(queries[coll][i]);
+          if(queries[coll][i].name === name){
+            oldQuery = queries[coll][i].query;
+            queries[coll].splice(i,1);
+            break;
+          }
+        }
+
+        delete $rootScope[ Name ];
+
+        socket.emit('alterSub', {
+          'coll': coll,
+          'name': Name,
+          'oldQuery': oldQuery,
+          'newQuery': query
         });
       }
     };
