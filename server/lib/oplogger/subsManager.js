@@ -58,6 +58,7 @@ module.exports = (function () {
         }
       });
     });
+    delete Clients[client.id.toString()];
   };
 
   var handleInsert = function (coll, item) {
