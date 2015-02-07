@@ -23,7 +23,7 @@
         </tr>
       </thead>
 
-      <tr ng-repeat="cat in Category">
+      <tr ng-repeat="cat in Category | orderBy:orderProp">
         <td>
           {{ cat.name }}
         </td>

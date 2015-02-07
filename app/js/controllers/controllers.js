@@ -35,6 +35,7 @@ controller('indexCtrl',
   ['$scope', 'OplogClient',
   function( $scope, OplogClient ) {
     $scope.query;
+    $scope.orderProp = "name";
 
     $scope.alterSub = function (query) {
       OplogClient.alterSub('category', 'Category', {"name": query});

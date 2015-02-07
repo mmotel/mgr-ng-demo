@@ -7,23 +7,32 @@ module.exports = (function () {
   // {
   //   'query',
   //   'items',
-  //   'clients'
+  //   'clients': {
+  //      'client': { 'id' }
+  //      'name'
+  //    }
   // }
   var Queries = {
     'category': []
   };
 
+  var Clients = {};
+
   var addSub = function (coll, name, query, client, items) {
+    var id = client.id.toString();
+    if(! Clients[id]){
+      Clients[id] = client;
+    }
     var qcoll = Queries[coll];
     var entry = _.find(qcoll, function (e) { return _.isEqual(e.query, query); });
     if(entry){
-      entry.clients.push({'client': client, 'name': name});
+      entry.clients.push({'client': {'id': id}, 'name': name});
     }
     else {
       qcoll.push({
         'query': query,
         'items': _.map( items, function (e) { return e._id.toString() } ),
-        'clients': [ {'client': client, 'name': name} ]
+        'clients': [ {'client': {'id': id}, 'name': name} ]
       });
     }
   };
@@ -57,7 +66,7 @@ module.exports = (function () {
       if( QueryManager.condition(entry.query, item) ){
         entry.items.push(item._id);
         _.forEach(entry.clients, function (c) {
-          c.client.emit('inserted', {
+          Clients[c.client.id].emit('inserted', {
             'coll': c.name,
             'item': item
           });
@@ -71,7 +80,7 @@ module.exports = (function () {
     _.forEach(qcoll, function (entry) {
       if( _.find(entry.items, function (e) { return _.isEqual(e, item._id.toString()); }) ){
         _.forEach(entry.clients, function (c) {
-          c.client.emit('updated', {
+          Clients[c.client.id].emit('updated', {
             'coll': c.name,
             'item': item,
             'query': query
@@ -86,7 +95,7 @@ module.exports = (function () {
     _.forEach(qcoll, function (entry) {
       if( _.remove(entry.items, function (e) { return _.isEqual(e, item._id.toString()); }).length > 0 ){
         _.forEach(entry.clients, function (c) {
-          c.client.emit('removed', {
+          Clients[c.client.id].emit('removed', {
             'coll': c.name,
             'item': item
           });
