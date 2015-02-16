@@ -5,7 +5,7 @@
 var appServices = angular.module('appOplogServices', []);
 
 appServices.
-factory('OplogClient',
+factory('Oplog',
   [ '$rootScope', 'socket', 'OplogManager',
   function( $rootScope, socket, OplogManager ) {
 
@@ -40,7 +40,7 @@ factory('OplogClient',
     });
 
     return {
-      'sub': function (coll, query, name) {
+      'subscribe': function (coll, query, name) {
         if(name){
           $rootScope[ name ] = [];
         }
@@ -54,7 +54,7 @@ factory('OplogClient',
           'name': name || coll
         });
       },
-      'rmSub': function (coll, name) {
+      'unsubscribe': function (coll, name) {
         var query = undefined;
         var Name = name || coll;
         if(! queries[coll]){ return; }
@@ -74,7 +74,7 @@ factory('OplogClient',
           'query': query
         });
       },
-      'alterSub': function (coll, name, query) {
+      'alter': function (coll, name, query) {
         var oldQuery = undefined;
         var Name = name || coll;
         if(! queries[coll]){ return; }

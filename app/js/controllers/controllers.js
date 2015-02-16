@@ -5,13 +5,13 @@
 var appControllers = angular.module('appControllers', []);
 
 appControllers.controller('MainAppCtrl',
-  ['$scope', 'AuthService', 'OplogClient',
-  function($scope, AuthService, OplogClient) {
+  ['$scope', 'AuthService', 'Oplog',
+  function($scope, AuthService, Oplog) {
     //check if loggedin
     AuthService.verify();
 
     //subscribe to collections via oplog
-  OplogClient.sub( 'category', {}, 'Category' );
+  Oplog.subscribe( 'category', {}, 'Category' );
 
     $scope.credentials = {
       "login": '',
@@ -32,21 +32,21 @@ appControllers.controller('MainAppCtrl',
 
 }]).
 controller('indexCtrl',
-  ['$scope', 'OplogClient',
-  function( $scope, OplogClient ) {
+  ['$scope', 'Oplog',
+  function( $scope, Oplog ) {
     $scope.query;
     $scope.orderProp = "name";
 
     $scope.alterSub = function (query) {
-      OplogClient.alterSub('category', 'Category', {"name": query});
+      Oplog.alter('category', 'Category', {"name": query});
     };
 
     // $scope.$watch('query', function () {
-    //   OplogClient.alterSub('category', 'Category', {"name": $scope.query});
+    //   Oplog.alter('category', 'Category', {"name": $scope.query});
     // });
 
     $scope.rmSub = function () {
-      OplogClient.rmSub('category', 'Category');
+      Oplog.unsubscribe('category', 'Category');
     };
 
 }]).
