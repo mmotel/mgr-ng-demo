@@ -4,7 +4,7 @@ module.exports = function (io, MongoUrl, MongoOplogUrl) {
   //start oplogger
   var Oplogger = require('./oplogger/main.js');
   var DB = require('./data.js')(MongoUrl);
-  var SubsManager = require('./oplogger/subsManager.js')();
+  var Subscription = require('./oplogger/subscription.js')();
 
   var Oplog = Oplogger.tail(MongoUrl, MongoOplogUrl,
               {'db': 'testdb', 'colls': [ 'category' ]});
@@ -16,7 +16,7 @@ module.exports = function (io, MongoUrl, MongoOplogUrl) {
       'coll': item.coll,
       'item': item.doc
     };
-    SubsManager.handleInsert(res.coll, res.item);
+    Subscription.handleInsert(res.coll, res.item);
   });
 
   Oplog.onUpdate(function (item) {
@@ -28,7 +28,7 @@ module.exports = function (io, MongoUrl, MongoOplogUrl) {
         '_id': item._id
       }
     };
-    SubsManager.handleUpdate(res.coll, res.item, res.query);
+    Subscription.handleUpdate(res.coll, res.item, res.query);
   });
 
   Oplog.onRemove(function (item) {
@@ -39,7 +39,7 @@ module.exports = function (io, MongoUrl, MongoOplogUrl) {
         '_id': item._id
       }
     };
-    SubsManager.handleRemove(res.coll, res.item);
+    Subscription.handleRemove(res.coll, res.item);
   });
   //--- /oplogger
 
@@ -49,7 +49,7 @@ module.exports = function (io, MongoUrl, MongoOplogUrl) {
       DB.find(args.coll, args.query, function (err, data) {
         if(err) { return console.log(err); }
 
-        SubsManager.addSub(args.coll, args.name, args.query, client, data);
+        Subscription.add(args.coll, args.name, args.query, client, data);
 
         var res = {
           'id': args.id,
@@ -63,16 +63,16 @@ module.exports = function (io, MongoUrl, MongoOplogUrl) {
     });
     //oplog tailing: remove subscription
     client.on('rmSub', function (args) {
-      SubsManager.rmSub(args.coll, args.query, client);
+      Subscription.remove(args.coll, args.query, client);
     });
     //oplog tailing: alter subscription
     client.on('alterSub', function (args) {
-      SubsManager.rmSub(args.coll, args.oldQuery, client);
+      Subscription.remove(args.coll, args.oldQuery, client);
 
       DB.find(args.coll, args.newQuery, function (err, data) {
         if(err) { return console.log(err); }
 
-        SubsManager.addSub(args.coll, args.name, args.newQuery, client, data);
+        Subscription.add(args.coll, args.name, args.newQuery, client, data);
 
         var res = {
           'id': args.id,
@@ -86,7 +86,7 @@ module.exports = function (io, MongoUrl, MongoOplogUrl) {
     });
     //oplog tailing: remove all subscriptions on disconnect
     client.on('disconnect', function () {
-      SubsManager.rmAllSubs( client );
+      Subscription.removeAll( client );
     });
   });
 

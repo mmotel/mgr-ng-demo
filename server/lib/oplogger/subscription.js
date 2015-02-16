@@ -1,7 +1,7 @@
 module.exports = (function () {
 
   var _ = require('lodash');
-  var QueryManager = require('./queryManager.js')();
+  var Query = require('./query.js')();
   //subscription & query manager
 
   // {
@@ -50,11 +50,11 @@ module.exports = (function () {
   };
 
   var rmAllSubs = function (client) {
-    _.forOwn(Queries, function (Query, id) {
-      _.forEach(Query, function (entry) {
+    _.forOwn(Queries, function (query, id) {
+      _.forEach(query, function (entry) {
         _.remove(entry.clients, function (c) { return _.isEqual(c.client.id, client.id); });
         if(entry.clients.length === 0){
-          _.remove(Query, function (e) { return _.isEqual(e.query, entry.query); });
+          _.remove(query, function (e) { return _.isEqual(e.query, entry.query); });
         }
       });
     });
@@ -64,7 +64,7 @@ module.exports = (function () {
   var handleInsert = function (coll, item) {
     var qcoll = Queries[coll];
     _.forEach(qcoll, function (entry) {
-      if( QueryManager.condition(entry.query, item) ){
+      if( Query.check(entry.query, item) ){
         entry.items.push(item._id);
         _.forEach(entry.clients, function (c) {
           Clients[c.client.id].emit('inserted', {
@@ -106,9 +106,9 @@ module.exports = (function () {
   };
 
   return {
-    'addSub': addSub,
-    'rmSub': rmSub,
-    'rmAllSubs': rmAllSubs,
+    'add': addSub,
+    'remove': rmSub,
+    'removeAll': rmAllSubs,
     'handleInsert': handleInsert,
     'handleUpdate': handleUpdate,
     'handleRemove': handleRemove

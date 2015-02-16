@@ -136,7 +136,7 @@ module.exports = (function () {
   };
 
   return {
-    'condition': Condition
+    'check': Condition
   }
 
 });
