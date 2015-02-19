@@ -17,6 +17,9 @@ var MONGO_OPLOG_URL =
 
 var Manager = require('./server/manager.js')( MONGO_URL );
 
+//oplog
+var Oplog = require('./server/oplog.js');
+
 //setup passport
 require('./server/passport.js')( passport, Manager );
 
@@ -39,6 +42,9 @@ var server = http.createServer(app).listen(app.get('port'), function(){
 
 //socket server startup
 Socket.listen(server, Manager, MONGO_URL, MONGO_OPLOG_URL);
+
+//oplog startup
+Oplog(server, MONGO_URL, MONGO_OPLOG_URL);
 
 //setup auth rest api
 require('./server/authrestapi.js')( app, passport, Manager );

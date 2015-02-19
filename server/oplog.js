@@ -1,10 +1,14 @@
-module.exports = function (io, MongoUrl, MongoOplogUrl) {
+module.exports = function (server, MongoUrl, MongoOplogUrl) {
 
+  //Socket.IO
+  var socketio = require('socket.io');
+  var io = socketio.listen( server );
+  //Lodash
   var _ = require('lodash');
   //start oplogger
-  var Oplogger = require('./oplogger/main.js');
-  var DB = require('./data.js')(MongoUrl);
-  var Subscription = require('./oplogger/subscription.js')();
+  var Oplogger = require('./lib/oplogger/main.js');
+  var DB = require('./lib/data.js')(MongoUrl);
+  var Subscription = require('./lib/oplogger/subscription.js')();
 
   var Oplog = Oplogger.tail(MongoUrl, MongoOplogUrl,
               {'db': 'testdb', 'colls': [ 'category' ]});
