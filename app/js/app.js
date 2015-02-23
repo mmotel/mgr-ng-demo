@@ -1,5 +1,3 @@
-'use strict';
-
 /* App Module */
 
 var App = angular.module('App', [
@@ -12,6 +10,7 @@ var App = angular.module('App', [
 
 App.config(['$routeProvider',
   function($routeProvider) {
+    'use strict';
     $routeProvider.
       when('/index', {
         templateUrl: 'partials/index.html',

@@ -4,10 +4,10 @@ module.exports = function ( mongourl ) {
 
   var FindOneUser = function (query, callback) {
     DB.findOne( 'user', query, callback );
-  }
+  };
 
   return {
-    'findOneUser': FindOneUser 
+    'findOneUser': FindOneUser
   };
 
 };

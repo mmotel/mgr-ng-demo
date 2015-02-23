@@ -177,6 +177,6 @@ module.exports = function ( mongourl ) {
     update: UpdateData,
     findOne: FindOneData,
     find: FindData
-  }
+  };
 
 };

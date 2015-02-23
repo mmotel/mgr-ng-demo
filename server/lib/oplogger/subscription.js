@@ -31,7 +31,7 @@ module.exports = (function () {
     else {
       qcoll.push({
         'query': query,
-        'items': _.map( items, function (e) { return e._id.toString() } ),
+        'items': _.map( items, function (e) { return e._id.toString(); } ),
         'clients': [ {'client': {'id': id}, 'name': name} ]
       });
     }
@@ -112,5 +112,5 @@ module.exports = (function () {
     'handleInsert': handleInsert,
     'handleUpdate': handleUpdate,
     'handleRemove': handleRemove
-  }
+  };
 });

@@ -1,5 +1,3 @@
-'use strict';
-
 /* Services */
 
 var appServices = angular.module('appServices', ['ngResource']);
@@ -7,6 +5,7 @@ var appServices = angular.module('appServices', ['ngResource']);
 appServices.factory('AuthService',
   [ '$rootScope', '$http',
   function( $rootScope, $http ) {
+  'use strict';
   return {
       'signin': function ( credentials ) {
         console.log('sigin');
@@ -47,6 +46,7 @@ appServices.factory('AuthService',
 factory('socket',
   ['$rootScope',
   function ($rootScope) {
+    'use strict';
     var socket = io.connect();
     return {
       on: function (eventName, callback) {
@@ -65,7 +65,7 @@ factory('socket',
               callback.$apply(socket, args);
             }
           });
-        })
+        });
       }
     };
 }]);

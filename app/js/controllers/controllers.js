@@ -1,5 +1,3 @@
-'use strict';
-
 /* Controllers */
 
 var appControllers = angular.module('appControllers', []);
@@ -7,6 +5,7 @@ var appControllers = angular.module('appControllers', []);
 appControllers.controller('MainAppCtrl',
   ['$scope', 'AuthService', 'Oplog',
   function($scope, AuthService, Oplog) {
+    'use strict';
     //check if loggedin
     AuthService.verify();
 
@@ -24,17 +23,18 @@ appControllers.controller('MainAppCtrl',
         'login': credentials.login,
         'password': credentials.password
       } );
-    }
+    };
     //sign out
     $scope.signout = function () {
       AuthService.signout();
-    }
+    };
 
 }]).
 controller('indexCtrl',
   ['$scope', 'Oplog',
   function( $scope, Oplog ) {
-    $scope.query;
+    'use strict';
+    $scope.query = "";
     $scope.orderProp = "name";
 
     $scope.alterSub = function (query) {
@@ -53,6 +53,7 @@ controller('indexCtrl',
 controller('signupCtrl',
   ['$scope', '$location',
   function( $scope, $location ) {
+    'use strict';
     $scope.signupFailed = false;
     $scope.account = {
       "login": "",

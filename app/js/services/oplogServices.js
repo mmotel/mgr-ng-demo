@@ -1,5 +1,3 @@
-'use strict';
-
 /* Services */
 
 var appServices = angular.module('appOplogServices', []);
@@ -8,7 +6,7 @@ appServices.
 factory('Oplog',
   [ '$rootScope', 'socket', 'OplogManager',
   function( $rootScope, socket, OplogManager ) {
-
+    'use strict';
     var queries = {};
 
     socket.on('sub', function ( args ) {
@@ -55,7 +53,7 @@ factory('Oplog',
         });
       },
       'unsubscribe': function (coll, name) {
-        var query = undefined;
+        var query;
         var Name = name || coll;
         if(! queries[coll]){ return; }
         for(var i = 0; i < queries[coll].length; i++){
@@ -75,7 +73,7 @@ factory('Oplog',
         });
       },
       'alter': function (coll, name, query) {
-        var oldQuery = undefined;
+        var oldQuery;
         var Name = name || coll;
         if(! queries[coll]){ return; }
         for(var i = 0; i < queries[coll].length; i++){
@@ -101,7 +99,7 @@ factory('Oplog',
 factory('OplogManager',
   [
   function () {
-
+  'use strict';
   var Insert = function ( coll, item ) {
     coll.push(item);
   };
@@ -131,7 +129,7 @@ factory('OplogManager',
           }
         }
         else if( prop === "$unset" ) {
-          delete item[field];
+          // delete item[field];
         }
       }
     }
