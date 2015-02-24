@@ -65,7 +65,7 @@ module.exports = (function () {
     var qcoll = Queries[coll];
     _.forEach(qcoll, function (entry) {
       if( Query.check(entry.query, item) ){
-        entry.items.push(item._id);
+        entry.items.push(item._id.toString());
         _.forEach(entry.clients, function (c) {
           Clients[c.client.id].emit('inserted', {
             'coll': c.name,
